@@ -1,0 +1,146 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+  output          = "../node_modules/@prisma/clients/nex-level"
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL_NEX_LEVEL")
+  extensions = [pgcrypto]
+}
+
+model Miles {
+  id             Int      @id @default(autoincrement()) @map("id_miles")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  personalNumber String   @map("personal_number")
+  level          String   @map("level")
+  category       String   @map("category")
+  name           String   @map("name") @db.Text
+  image          String   @map("image")
+  path           String   @map("path")
+  minPoint       Int      @unique @map("min_point")
+  maxPoint       Int      @map("max_point")
+  status         Boolean  @map("status")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([uuid])
+  @@map("miles")
+}
+
+model Point {
+  id             Int      @id @default(autoincrement()) @map("id_point")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  personalNumber String   @unique @map("personal_number")
+  personalName   String   @map("personal_name")
+  personalUnit   String   @map("personal_unit")
+  title          String?  @map("title")
+  personalEmail  String?  @map("personal_email")
+  point          Int      @map("point")
+  totalPoint     Int      @map("total_point")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([uuid])
+  @@map("point")
+}
+
+model Merchandise {
+  id             Int      @id @default(autoincrement()) @map("id_merchandise")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  personalNumber String   @map("personal_number") @db.VarChar()
+  title          String   @map("title")
+  description    String   @map("description") @db.Text
+  qty            Int      @map("qty")
+  point          Int      @map("point")
+  isPinned       Boolean  @default(false) @map("is_pinned")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  merchandiseRedeem Redeems[]
+  imageMerchandise  MerchandiseImage[]
+
+  @@index([uuid])
+  @@map("merchandise")
+}
+
+model MerchandiseImage {
+  id             Int      @id @default(autoincrement()) @map("id_merchandise_image")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  merchandiseId  Int      @map("id_merchandise")
+  personalNumber String   @map("personal_number") @db.VarChar()
+  image          String   @map("image")
+  path           String   @map("path")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  imageMerchandise Merchandise @relation(fields: [merchandiseId], references: [id], onDelete: Cascade)
+
+  @@index([uuid])
+  @@map("merchandise_image")
+}
+
+model PointConfig {
+  id        Int      @id @default(autoincrement()) @map("id_point_config")
+  uuid      String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  activity  String   @map("activity")
+  slug      String   @map("slug")
+  point     Int      @map("point")
+  status    Boolean  @map("status")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([uuid])
+  @@map("point_config")
+}
+
+model HistoryPoint {
+  id             Int      @id @default(autoincrement()) @map("id_point")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  personalNumber String   @map("personal_number")
+  activity       String   @map("activity")
+  point          Int      @map("point")
+  status         Boolean? @map("status")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([uuid])
+  @@map("history_point")
+}
+
+model HistoryPointOfYears {
+  id             Int      @id @default(autoincrement()) @map("id_point")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  personalNumber String   @unique @map("personal_number")
+  point          Int      @map("point")
+  year           Int      @map("year")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([uuid])
+  @@map("history_point_of_years")
+}
+
+model Redeems {
+  id             Int       @id @default(autoincrement()) @map("id_redeems")
+  uuid           String    @unique @default(uuid()) @map("uuid") @db.Uuid
+  merchandiseId  Int       @map("id_merchandise")
+  personalNumber String    @map("personal_number")
+  personalName   String    @map("personal_name")
+  personalEmail  String    @map("personal_email")
+  personalUnit   String    @map("personal_unit")
+  redeemDate     DateTime? @map("redeem_date")
+  claimStatus    Boolean?  @map("claim_status")
+  status         Boolean?  @map("status")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  merchandiseRedeem Merchandise @relation(fields: [merchandiseId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([uuid])
+  @@map("redeems")
+}

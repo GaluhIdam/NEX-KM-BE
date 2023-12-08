@@ -1,0 +1,36 @@
+# Dockerfile
+
+# Use Node.js version 14 as the base image
+FROM node:16.16.0-alpine
+
+# Set the working directory to /app
+WORKDIR /app
+
+# Copy the package.json and yarn.lock files to the container
+COPY package.json yarn.lock ./
+
+# Install the dependencies
+RUN npm install
+
+# Copy the rest of the application code to the container
+COPY . .
+
+# Install Prisma globally
+RUN npm install -g prisma
+
+# Generate the Prisma client
+#RUN npm run prisma:generate:nex-library
+#RUN npm run prisma:generate:nex-learning
+#RUN npm run prisma:generate:nex-community
+#RUN npm run prisma:generate:nex-level
+#RUN npm run prisma:generate:homepage
+#RUN npm run prisma:generate:nex-talk
+
+RUN npm run migrasi:semua-data
+RUN npm run migrasi:semua
+
+# Expose port 3000 for the application to listen on
+EXPOSE 3000
+
+# Set the command to start the application
+CMD ["npm", "run", "start"]

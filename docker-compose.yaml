@@ -1,0 +1,62 @@
+version: '3.6'
+services:
+    nex_km_backend:
+        image: th/nex_km:latest
+        container_name: nex-km-nest
+        restart: always
+        networks:
+            - nexkmnet
+        ports:
+            - '8014:3000'
+        volumes:
+            - album-gallery:/app/uploads/album/album-gallery
+            - album-cover:/app/uploads/album/cover
+            - article-cover:/app/uploads/article/cover
+            - best-practice-cover:/app/uploads/best-practice/cover
+            - community-activity:/app/uploads/community/activity
+            - community-headline:/app/uploads/community/headline
+            - community-thumbnail:/app/uploads/community/thumbnail
+            - community-icon:/app/uploads/community/icon
+            - forum-media:/app/uploads/forum/media
+            - level-merchandise:/app/uploads/level/merchandise
+            - level-mile:/app/uploads/level/mile
+            - ebook-file:/app/uploads/ebook/file
+            - ebook-thumbnail:/app/uploads/ebook/thumbnail
+            - podcast-cover:/app/uploads/podcast/cover
+            - podcast-creators:/app/uploads/podcast/creators
+            - podcast-file:/app/uploads/podcast/file
+            - podcast-series:/app/uploads/podcast/series
+            - story:/app/uploads/story/video
+            - story-cover:/app/uploads/story/cover
+            - stream-file:/app/uploads/stream/file
+            - stream-thumbnail:/app/uploads/stream/thumbnail
+            - web-directory-cover:/app/uploads/web-directory/cover
+            - user-photo:/app/uploads/user/photo
+volumes:
+    album-gallery:
+    album-cover:
+    article-cover:
+    best-practice-cover:
+    ebook-file:
+    ebook-thumbnail:
+    community-activity:
+    community-headline:
+    community-thumbnail:
+    community-icon:
+    level-merchandise:
+    level-mile:
+    forum-media:
+    podcast-cover:
+    podcast-creators:
+    podcast-file:
+    podcast-series:
+    story:
+    story-cover:
+    stream-file:
+    stream-thumbnail:
+    web-directory-cover:
+    user-photo:
+networks:
+    nexkmnet:
+        external:
+            name: microservice_global_network

@@ -1,0 +1,193 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+  output          = "../node_modules/@prisma/clients/nex-library"
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL_NEX_LIBRARY")
+  extensions = [pgcrypto]
+}
+
+model EbookCategories {
+  id             Int      @id @default(autoincrement()) @map("id_ebook_category")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  name           String   @map("name")
+  personalNumber String   @map("personal_number")
+  isActive       Boolean  @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  ebookCategoriesEbooks Ebook[]
+
+  @@map("ebook_categories")
+}
+
+model Ebook {
+  id              Int      @id @default(autoincrement()) @map("id_ebook")
+  uuid            String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  ebookCategoryId Int      @map("id_ebook_category")
+  ebookFile       String   @map("ebook_file")
+  title           String   @map("title")
+  ebookCover      String   @map("ebook_cover")
+  pathCover       String   @map("path_cover")
+  pathEbook       String   @map("path_ebook")
+  synopsis        String   @map("synopsis") @db.Text
+  overview        String   @map("overview") @db.Text
+  author          String   @map("author")
+  aboutAuthor     String   @map("about_author") @db.Text
+  personalNumber  String   @map("personal_number")
+  uploadBy        String   @map("upload_by")
+  unit            String   @map("unit")
+  viewCount       Int      @map("view_count")
+  approvalStatus  String  @map("approval_status")
+  descStatus      String?  @map("description_status")
+  approvalBy      String?  @map("approval_by")
+  editorChoice    Boolean  @map("editor_choice")
+  status          Boolean  @map("status")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  ebooksEbookCategories EbookCategories @relation(fields: [ebookCategoryId], references: [id], onDelete: Cascade)
+
+  ebooksEbookReviews EbookReviews[]
+
+  collectionEbook EbookCollection[]
+
+  readEbook EbookRead[]
+
+  @@map("ebooks")
+}
+
+model EbookReviews {
+  id             Int      @id @default(autoincrement()) @map("id_ebook_reviews")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  ebookId        Int      @map("id_ebook")
+  personalNumber String   @map("personal_number")
+  message        String   @map("message") @db.Text
+  rate           Int      @map("rate")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  ebookReviewsEbooks Ebook @relation(fields: [ebookId], references: [id], onDelete: Cascade)
+
+  @@map("ebook_reviews")
+}
+
+model EbookCollection {
+  id             Int      @id @default(autoincrement()) @map("id_ebook_collection")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  ebookId        Int      @map("id_ebook")
+  personalNumber String   @map("personal_number")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  collectionEbook Ebook @relation(fields: [ebookId], references: [id], onDelete: Cascade)
+
+  @@map("ebook_collection")
+}
+
+model EbookRead {
+  id             Int      @id @default(autoincrement()) @map("id_read_ebook")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  ebookId        Int      @map("id_ebook")
+  personalNumber String   @map("personal_number")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  readEbook Ebook @relation(fields: [ebookId], references: [id], onDelete: Cascade)
+
+  @@map("ebook_read")
+}
+
+model AlbumCategory {
+  id             Int      @id @default(autoincrement()) @map("id_album_category")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  personalNumber String   @map("personal_number")
+  name           String   @map("name")
+  isActive       Boolean  @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  albumCategory Album[]
+
+  @@map("album_category")
+}
+
+model Album {
+  id              Int      @id @default(autoincrement()) @map("id_album")
+  uuid            String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  categoryAlbumId Int      @map("id_album_category")
+  albumCover      String   @map("album_cover")
+  path            String   @map("path")
+  title           String   @map("title")
+  description     String   @map("description")
+  personalNumber  String   @map("personal_number")
+  uploadBy        String   @map("upload_by")
+  unit            String   @map("unit")
+  approvalStatus  String  @map("approval_status")
+  descStatus      String?  @map("description_status")
+  approvalBy      String?  @map("approval_by")
+  editorChoice    Boolean  @map("editor_choice")
+  status          Boolean  @map("status")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  albumCategory AlbumCategory @relation(fields: [categoryAlbumId], references: [id], onDelete: Cascade)
+
+  galleryAlbum AlbumGallery[]
+
+  @@map("album")
+}
+
+model AlbumGallery {
+  id             Int      @id @default(autoincrement()) @map("id_album_gallery")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  albumId        Int      @map("id_album")
+  personalNumber String   @map("personal_number")
+  name           String   @map("name")
+  path           String   @map("path")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  galleryAlbum Album @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  @@map("album_gallery")
+}
+
+model UnitDinas {
+  id             Int      @id @default(autoincrement()) @map("id_unit_dinas")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  personalNumber String   @map("personal_number")
+  name           String   @map("name")
+  code           String   @map("code")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  directoryWeb WebDirectory[]
+
+  @@map("unit_dinas")
+}
+
+model WebDirectory {
+  id             Int      @id @default(autoincrement()) @map("id_web_directory")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  dinasId        Int      @map("id_unit_dinas")
+  title          String   @map("title")
+  description    String   @map("description")
+  link           String   @map("link")
+  cover          String   @map("cover")
+  path           String   @map("path")
+  personalNumber String   @map("personal_number")
+  status         Boolean  @map("status")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  directoryWeb UnitDinas @relation(fields: [dinasId], references: [id], onDelete: Cascade)
+
+  @@map("web_directory")
+}

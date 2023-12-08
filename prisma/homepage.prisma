@@ -1,0 +1,283 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+  output          = "../node_modules/@prisma/clients/homepage"
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL_HOMEPAGE")
+  extensions = [pgcrypto]
+}
+
+model UserList {
+  id                 Int      @id @default(autoincrement()) @map("id_user_list")
+  uuid               String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  userName           String   @map("user_name")
+  userPhoto          String   @map("user_photo")
+  personalNumber     String   @unique @map("personal_number")
+  personalName       String   @map("personal_name")
+  personalTitle      String?  @map("personal_title")
+  personalUnit       String   @map("personal_unit")
+  personalBirthPlace String?  @map("personal_birthplace")
+  personalBirthDate  String?  @map("personal_date")
+  personalGrade      String?  @map("personal_grade")
+  personalJobDesc    String?  @map("personal_jobdesc")
+  personalEmail      String?  @map("personal_email")
+  personalImage      String?  @map("personal_image")
+  instagram          String?  @map("instagram")
+  linkedIn           String?  @map("linked_in")
+  facebook           String?  @map("facebook")
+  token              String?  @unique @map("token") @db.Text
+  signAs             String?  @map("signAs") @db.Text
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  skillUser            UserSkill[]
+  interestUser         UserInterest[]
+  followerFollowerUser FollowingFollower[]
+  roleUser             UserRole[]
+
+  @@index([uuid])
+  @@map("user_list")
+}
+
+model UserInterest {
+  id             Int      @id @default(autoincrement()) @map("id_user_interest")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  personalNumber String   @map("personal_number")
+  interestId     Int      @map("id_interest")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  interestUser UserList @relation(fields: [personalNumber], references: [personalNumber], onDelete: Cascade, onUpdate: Cascade)
+  interestList Interest @relation(fields: [interestId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([uuid])
+  @@map("user_interest")
+}
+
+model UserSkill {
+  id             Int      @id @default(autoincrement()) @map("id_user_skill")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  personalNumber String   @map("personal_number")
+  skillId        Int      @map("id_skill")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  skillUser UserList @relation(fields: [personalNumber], references: [personalNumber], onDelete: Cascade, onUpdate: Cascade)
+  skillList Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([uuid])
+  @@map("user_skill")
+}
+
+model Interest {
+  id        Int      @id @default(autoincrement()) @map("id_interest")
+  uuid      String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  name      String   @map("name")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  interestList UserInterest[]
+
+  @@index([uuid])
+  @@map("interests")
+}
+
+model Skill {
+  id        Int      @id @default(autoincrement()) @map("id_skill")
+  uuid      String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  name      String   @map("name")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  skillUser UserSkill[]
+
+  @@index([uuid])
+  @@map("skills")
+}
+
+model Sliders {
+  id              Int      @id @default(autoincrement()) @map("id_slider")
+  uuid            String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  personalNumber  String   @map("personal_number")
+  title           String   @map("title") @db.VarChar()
+  description     String   @map("description") @db.Text
+  backgroundImage String   @map("background_image") @db.VarChar()
+  sequence        Int      @map("sequence")
+  uploadedBy      String   @map("uploaded_by") @db.VarChar()
+  status          Boolean? @map("status")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([uuid])
+  @@map("sliders")
+}
+
+model NexTeams {
+  id              Int      @id @default(autoincrement()) @map("id_nex_team")
+  uuid            String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  personnelNumber String   @unique @map("personnel_number")
+  position        String   @map("position")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([uuid])
+  @@map("nex_teams")
+}
+
+model NexRoles {
+  id        Int      @id @default(autoincrement()) @map("id_nex_role")
+  uuid      String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  name      String   @map("name")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([uuid])
+  @@map("nex_roles")
+}
+
+model SharingExp {
+  id             Int      @id @default(autoincrement()) @map("id_nex_sharing_exp")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  personalNumber String   @map("personal_number") @db.VarChar()
+  title          String   @map("title")
+  place          String   @map("place")
+  country        String   @map("country")
+  state          String   @map("state")
+  city           String   @map("city")
+  date           String   @map("date")
+  description    String   @map("description")
+  approvalStatus Boolean? @map("approval_status")
+  approvedBy     String?  @map("approved_by")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([uuid])
+  @@map("sharing_experiences")
+}
+
+model Notification {
+  id                     Int      @id @default(autoincrement()) @map("notification_id")
+  uuid                   String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  senderPersonalNumber   String   @map("sender_personal_number") @db.VarChar()
+  receiverPersonalNumber String   @map("receiver_personal_number") @db.VarChar()
+  title                  String   @map("title") @db.VarChar()
+  description            String   @map("description") @db.Text
+  isRead                 Boolean  @default(false) @map("is_read")
+  contentType            String   @map("content_type") @db.VarChar()
+  contentUuid            String   @map("content_uuid") @db.VarChar()
+  createdAt              DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([uuid])
+  @@map("notifications")
+}
+
+model FollowingFollower {
+  id                      Int      @id @default(autoincrement()) @map("id_follower")
+  uuid                    String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  personalNameFollower    String   @map("personal_name_follower")
+  personalNumberFollower  String   @map("personal_number_follower")
+  personalNameFollowing   String   @map("personal_name_following")
+  personalNumberFollowing String   @map("personal_number_following")
+  createdAt               DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt               DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  followerFollowerUser UserList @relation(fields: [personalNumberFollower], references: [personalNumber], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([uuid])
+  @@map("following_follower")
+}
+
+model CommunityFollow {
+  id             Int      @id @default(autoincrement()) @map("id_community_follow")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  communityId    Int      @map("id_community")
+  personalNumber String   @map("personal_number")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([uuid])
+  @@map("community_follow")
+}
+
+model Roles {
+  id          Int      @id @default(autoincrement()) @map("id_role")
+  uuid        String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  name        String   @unique @map("name")
+  description String   @map("description")
+  page        String   @map("page")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  permissionRole RolePermission[]
+  listRole       UserRole[]
+
+  @@index([uuid])
+  @@map("roles")
+}
+
+model MasterPermission {
+  id          Int              @id @default(autoincrement()) @map("id_master_permission")
+  uuid        String           @unique @default(uuid()) @map("uuid") @db.Uuid
+  name        String           @unique @map("name")
+  description String           @map("description")
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  Permission  RolePermission[]
+
+  @@index([uuid])
+  @@map("master_permission")
+}
+
+model RolePermission {
+  id                 Int      @id @default(autoincrement()) @map("id_permission")
+  uuid               String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  roleId             Int      @map("id_role")
+  masterPermissionId Int      @map("id_master_permission")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  permissionRole   Roles            @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  permissionMaster MasterPermission @relation(fields: [masterPermissionId], references: [id])
+
+  @@index([uuid])
+  @@map("role_permission")
+}
+
+model UserRole {
+  id     Int    @id @default(autoincrement()) @map("id_user_role")
+  uuid   String @unique @default(uuid()) @map("uuid") @db.Uuid
+  roleId Int    @map("id_role")
+  userId Int    @map("id_user")
+
+  roleUser UserList @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  listRole Roles    @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([uuid])
+  @@map("user_role")
+}
+
+model ForYourPage {
+  id             Int      @id @default(autoincrement()) @map("id_for_your_page")
+  uuid           String   @unique @map("uuid") @db.Uuid
+  idContent      Int      @map("id_content")
+  title          String   @map("title")
+  description    String   @map("description") @db.Text
+  personalNumber String   @map("personal_number")
+  personalName   String   @map("personal_name")
+  path           String   @map("path") @db.Text
+  cover          String?  @map("cover") @db.Text
+  link           String   @map("link")
+  category       String   @map("category")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([uuid])
+  @@map("for_your_page")
+}

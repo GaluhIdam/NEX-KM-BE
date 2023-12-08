@@ -1,0 +1,263 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider        = "prisma-client-js"
+    previewFeatures = ["postgresqlExtensions"]
+    output          = "../node_modules/@prisma/clients/nex-talk"
+}
+
+datasource db {
+    provider   = "postgresql"
+    url        = env("DATABASE_URL_NEX_TALK")
+    extensions = [pgcrypto]
+}
+
+model TalkCategory {
+    id             Int      @id @default(autoincrement()) @map("id_talk_category")
+    uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid 
+    name           String   @map("name")
+    status         Boolean   @map("status")
+    createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    forums Forum[]
+    creators Creator[]
+    streams Stream[]
+
+    @@map("talk_category")
+
+}
+
+model Forum {
+    id              Int      @id @default(autoincrement()) @map("id_forum")
+    uuid            String   @unique @default(uuid()) @map("uuid") @db.Uuid
+    personalNumber  String   @map("personal_number")
+    talkCategoryId  Int      @map("id_talk_category")
+    name            String   @map("name")
+    path            String   @map("path")
+    title           String   @map("title")
+    description     String   @map("description")
+    likeCount       Int      @map("like_count")
+    voteCount       Int      @map("vote_count")
+    approvalStatus  String   @map("approval_status")
+    approvalMessage String   @map("approval_message")
+    approvalBy      String   @map("approval_by")
+    editorChoice    Boolean  @map("editor_choice")
+    createdBy       String   @map("created_by")
+    unit            String   @map("unit")
+    status          Boolean   @map("status")
+    createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    talkCategory TalkCategory @relation(fields: [talkCategoryId], references: [id], onDelete: Cascade)
+
+    forumComment CommentForum[]
+    forumVote VoteForum[]
+
+    @@map("forum")
+}
+
+model VoteForum {
+    id                      Int              @id @default(autoincrement()) @map("id_comment_forum")
+    uuid                    String           @unique @default(uuid()) @map("uuid") @db.Uuid
+    forumId                 Int              @map("id_forum")
+    personalNumber          String           @map("personal_number")
+    isUpvote                Boolean          @map("is_upvote")   
+    createdAt               DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt               DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    forumVote Forum @relation(fields: [forumId], references: [id], onDelete: Cascade)
+
+    @@map("vote_forum")
+}
+
+
+model CommentForum {
+    id                      Int              @id @default(autoincrement()) @map("id_comment_forum")
+    uuid                    String           @unique @default(uuid()) @map("uuid") @db.Uuid
+    forumId                 Int              @map("id_forum")
+    personalNumber          String           @map("personal_number")
+    comment                 String           @map("comment")
+    parentId                Int?             @map("parent_id")
+    createdBy               String           @map("created_by")
+    isChildCommentShow      Boolean          @map("is_child_comment_show")
+    createdAt               DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt               DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    parentComment CommentForum?  @relation("replyCommentForumRelation", fields: [parentId], references: [id], onDelete: Cascade)
+    childComment  CommentForum[] @relation("replyCommentForumRelation")
+
+    forumComment Forum @relation(fields: [forumId], references: [id], onDelete: Cascade)
+    likeComment    CommentForumLike[]
+
+    @@map("comment_forum")
+}
+
+model CommentForumLike {
+    id               Int      @id @default(autoincrement()) @map("id_comment_forum_like")
+    uuid             String   @unique @default(uuid()) @map("uuid") @db.Uuid
+    forumId          Int      @map("id_article")
+    commentForumId   Int      @map("id_comment_forum")
+    likeOrdislike    Boolean  @map("like_dislike")
+    personalNumber   String   @map("personal_number")
+    createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+
+    likeComment       CommentForum @relation(fields: [commentForumId], references: [id], onDelete: Cascade)
+
+    @@map("comment_forum_like")
+}
+
+model Creator {
+    id              Int      @id @default(autoincrement()) @map("id_creator")
+    uuid            String   @unique @default(uuid()) @map("uuid") @db.Uuid 
+    talkCategoryId  Int      @map("id_talk_category")
+    personalNumber  String   @map("personal_number")
+    name            String   @map("name")
+    description     String   @map("description")
+    image           String   @map("image")
+    path            String   @map("path")
+    likeCount       Int      @map("like_count")
+    approvalStatus  String   @map("approval_status")
+    approvalMessage String   @map("approval_message")
+    approvalBy      String   @map("approval_by")
+    status          Boolean   @map("status")
+    editorChoice    Boolean  @map("editor_choice")
+    createdBy       String   @map("created_by")
+    unit            String   @map("unit")
+    createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    talkCategory TalkCategory @relation(fields: [talkCategoryId], references: [id], onDelete: Cascade)
+
+    series Serie[]
+
+    @@map("creator")
+
+}
+
+model Serie {
+    id              Int      @id @default(autoincrement()) @map("id_serie")
+    uuid            String   @unique @default(uuid()) @map("uuid") @db.Uuid
+    creatorId       Int      @map("id_creator")
+    image           String   @map("image")
+    path            String   @map("path")
+    title           String   @map("title")
+    likeCount       Int      @map("like_count")
+    description     String   @map("description")
+    approvalStatus  String   @map("approval_status")
+    approvalMessage String   @map("approval_message")
+    approvalBy      String   @map("approval_by")
+    status          Boolean   @map("status")
+    editorChoice    Boolean  @map("editor_choice")
+    personalNumber  String   @map("personal_number")
+    createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    creator Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+    seriesPodcast Podcast[]
+
+    @@map("serie")
+}
+
+model Podcast {
+    id              Int      @id @default(autoincrement()) @map("id_podcast")
+    uuid            String   @unique @default(uuid()) @map("uuid") @db.Uuid
+    serieId         Int      @map("id_serie")
+    title           String   @map("title")
+    description     String   @map("description")
+    image           String   @map("image")
+    pathImage       String   @map("path_image")
+    file            String   @map("file")
+    pathFile        String   @map("path_file")
+    likeCount       Int      @map("like_count")
+    approvalStatus  String   @map("approval_status")
+    approvalMessage String   @map("approval_message")
+    approvalBy      String   @map("approval_by")
+    status          Boolean  @map("status")
+    editorChoice    Boolean  @map("editor_choice")
+    personalNumber  String   @map("personal_number")
+    createdBy       String   @map("created_by")
+    createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    seriePodcast Serie @relation(fields: [serieId], references: [id], onDelete: Cascade)
+
+    colaboratorPodcast Colaborator[]
+
+    @@map("podcast")
+}
+
+model Colaborator {
+    id             Int      @id @default(autoincrement()) @map("id_colaborator")
+    uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+    podcastId      Int      @map("id_podcast")
+    personalNumber String   @map("personal_number")
+    createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    colaboratorPodcast Podcast @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+
+    @@map("colaborator")
+}
+
+model Stream {
+    id              Int      @id @default(autoincrement()) @map("id_stream")
+    uuid            String   @unique @default(uuid()) @map("uuid") @db.Uuid
+    talkCategoryId  Int      @map("id_talk_category")
+    personalNumber  String   @map("personal_number")
+    title           String   @map("title")
+    description     String   @map("description")
+    thumbnail       String   @map("thumbnail")
+    pathThumbnail   String   @map("path_thumbnail")
+    video           String   @map("video")
+    pathVideo        String   @map("path_video")
+    viewCount       Int      @map("view_count")
+    likeCount       Int      @map("like_count")
+    approvalStatus  String   @map("approval_status")
+    approvalMessage String   @map("approval_message")
+    approvalBy      String   @map("approval_by")
+    status          Boolean  @map("status")
+    editorChoice    Boolean  @map("editor_choice")
+    createdBy       String   @map("created_by")
+    unit            String   @map("unit")
+    createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    talkCategory TalkCategory @relation(fields: [talkCategoryId], references: [id], onDelete: Cascade)
+
+    streamFavorite FavoriteStream[]
+
+    streamWatch WatchStream[]
+
+    @@map("stream")
+}
+
+model FavoriteStream {
+    id             Int      @id @default(autoincrement()) @map("id_like_stream")
+    uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+    streamId       Int      @map("id_stream")
+    personalNumber String   @map("personal_number")
+    createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    streamFavorite Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
+
+    @@map("like_stream")
+}
+
+model WatchStream {
+    id             Int      @id @default(autoincrement()) @map("id_watch_stream")
+    uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+    streamId       Int      @map("id_stream")
+    personalNumber String   @map("personal_number")
+    createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    streamWatch Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
+
+    @@map("watch_stream")
+}

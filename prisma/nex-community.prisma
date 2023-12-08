@@ -1,0 +1,159 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+  output          = "../node_modules/@prisma/clients/nex-community"
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL_NEX_COMMUNITY")
+  extensions = [pgcrypto]
+}
+
+model Communities {
+  id                   Int      @id @default(autoincrement()) @map("id_communities")
+  uuid                 String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  name                 String   @map("name")
+  personalNumber       String   @map("personalNumber")
+  location             String   @map("location")
+  about                String   @map("about") @db.Text
+  leader               String   @map("leader")
+  leaderProfile        String   @map("leader_profile") @db.Text
+  leaderPersonalNumber String   @map("leader_personal_number")
+  instagram            String   @map("instagram")
+  statusPublish        Boolean  @map("status_publish")
+  bannedStatus         Boolean  @map("ban_status")
+  thumbnailPhoto       String   @map("thumbnail_photo")
+  thumbnailPhotoPath   String   @map("thumbnail_photo_path")
+  headlinedPhoto       String   @map("headline_photo")
+  headlinedPhotoPath   String   @map("headline_photo_path")
+  founded              DateTime @map("founded")
+  icon                 String   @map("icon")
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  communitiesCommunityMembers    CommunityMembers[]
+  communitiesCommunityFollows    CommunityFollows[]
+  communitiesCommunityActivities CommunityActivities[]
+
+  @@index([uuid])
+  @@map("communities")
+}
+
+model CommunityMembers {
+  id              Int      @id @default(autoincrement()) @map("id_community_members")
+  uuid            String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  communityId     Int      @map("id_communities")
+  communityRoleId Int      @map("id_community_roles")
+  personalNumber  String   @map("personal_number")
+  personalName    String   @map("personal_name")
+  personalUnit    String   @map("personal_unit")
+  personalEmail   String   @map("personal_email")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  communityMembersCommunities    Communities    @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  communityMembersCommunityRoles CommunityRoles @relation(fields: [communityRoleId], references: [id], onDelete: Cascade)
+
+  @@index([uuid])
+  @@map("community_members")
+}
+
+model CommunityRoles {
+  id        Int      @id @default(autoincrement()) @map("id_community_roles")
+  uuid      String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  name      String   @map("name")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  communityRolesCommunityMembers CommunityMembers[]
+
+  @@index([uuid])
+  @@map("community_roles")
+}
+
+model CommunityActivities {
+  id             Int      @id @default(autoincrement()) @map("id_community_activities")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  communityId    Int      @map("id_communities")
+  title          String   @map("title")
+  description    String   @map("description")
+  photo          String   @map("photo")
+  path           String   @map("path")
+  personalNumber String   @map("personal_number")
+  personalName   String   @map("personal_name")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  communityActivitiesCommunities Communities       @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  activityComment                CommentActivity[]
+
+  @@index([uuid])
+  @@map("community_activities")
+}
+
+model CommunityFollows {
+  id             Int      @id @default(autoincrement()) @map("id_community_follows")
+  uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  communityId    Int      @map("community_id")
+  personalNumber String   @map("personal_number")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  communityFollowsCommunities Communities @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@index([uuid])
+  @@map("community_follows")
+}
+
+model CommentActivity {
+  id                    Int               @id @default(autoincrement()) @map("id_comment_activity")
+  uuid                  String            @unique @default(uuid()) @map("uuid") @db.Uuid
+  communityActivityId   Int               @map("id_community_activities")
+  personalNumber        String            @map("personal_number")
+  personalName          String            @map("personal_name")
+  personalNumberMention String?           @map("personal_number_mention")
+  personalNameMention   String?           @map("personal_name_mention")
+  comment               String            @map("comment")
+  parentId              Int?              @map("parent_id")
+  like                  Int               @map("like")
+  dislike               Int               @map("dislike")
+  createdAt             DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  parentComment         CommentActivity?  @relation("replyCommentrelation", fields: [parentId], references: [id], onDelete: Cascade)
+  childComment          CommentActivity[] @relation("replyCommentrelation")
+
+  activityComment     CommunityActivities   @relation(fields: [communityActivityId], references: [id], onDelete: Cascade)
+  commentLikeActivity CommentLikeActivity[]
+
+  @@map("comment_activity")
+}
+
+model CommentLikeActivity {
+  id                Int      @id @default(autoincrement()) @map("id_comment_like")
+  uuid              String   @unique @default(uuid()) @map("uuid") @db.Uuid
+  activityId        Int      @map("id_activity")
+  commentActivityId Int      @map("id_comment_activity")
+  likeOrdislike     Boolean  @map("like_dislike")
+  personalNumber    String   @map("personal_number")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  commentLikeAtivity CommentActivity @relation(fields: [commentActivityId], references: [id], onDelete: Cascade)
+
+  @@map("comment_like")
+}
+
+model CommunityFuseSearch {
+  id        Int      @id @default(autoincrement()) @map("id_search")
+  search    String   @unique @map("search")
+  count     Int      @map("count")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([search])
+  @@map("community_fuse")
+}

@@ -1,0 +1,209 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider        = "prisma-client-js"
+    previewFeatures = ["postgresqlExtensions", "views"]
+    output          = "../node_modules/@prisma/clients/nex-learning"
+}
+
+datasource db {
+    provider   = "postgresql"
+    url        = env("DATABASE_URL_NEX_LEARNING")
+    extensions = [pgcrypto]
+}
+
+model CategoryArticle {
+    id             Int      @id @default(autoincrement()) @map("id_category_article")
+    uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+    title          String   @map("title")
+    personalNumber String   @map("personal_number")
+    status         Boolean  @map("status")
+    createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    articleCategory Article[]
+
+    @@map("category_article")
+}
+
+model Article {
+    id                     Int      @id @default(autoincrement()) @map("id_article")
+    uuid                   String   @unique @default(uuid()) @map("uuid") @db.Uuid
+    articleCategoryId      Int      @map("id_category_article")
+    personalNumber         String   @map("personal_number")
+    title                  String   @map("title")
+    content                String   @map("content")
+    image                  String   @map("image")
+    path                   String   @map("path")
+    score                  Int      @map("score")
+    uploadBy               String   @map("upload_by")
+    unit                   String   @map("unit")
+    approvalStatus         Boolean? @map("approval_status")
+    approvalDesc           String?  @map("approval_desc")
+    approvalBy             String?  @map("approval_by")
+    approvalPersonalNumber String?  @map("approval_personal_number")
+    editorChoice           Boolean  @map("editor_choice")
+    favorite               Boolean  @map("favorite")
+    bannedStatus           Boolean  @map("banned_status")
+    createdAt              DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt              DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    articleCategory CategoryArticle  @relation(fields: [articleCategoryId], references: [id], onDelete: NoAction)
+    articleComment  CommentArticle[]
+
+    @@map("articles")
+}
+
+model CommentArticle {
+    id                    Int              @id @default(autoincrement()) @map("id_comment_practice")
+    uuid                  String           @unique @default(uuid()) @map("uuid") @db.Uuid
+    articleId             Int              @map("id_article")
+    personalNumber        String           @map("personal_number")
+    personalName          String           @map("personal_name")
+    personalNumberMention String?          @map("personal_number_mention")
+    personalNameMention   String?          @map("personal_name_mention")
+    comment               String           @map("comment")
+    parentId              Int?             @map("parent_id")
+    like                  Int              @map("like")
+    dislike               Int              @map("dislike")
+    createdAt             DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt             DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+    parentComment         CommentArticle?  @relation("replyCommentrelation", fields: [parentId], references: [id], onDelete: Cascade)
+    childComment          CommentArticle[] @relation("replyCommentrelation")
+
+    articleComment     Article              @relation(fields: [articleId], references: [id], onDelete: Cascade)
+    commentLikeArticle CommentLikeArticle[]
+
+    @@map("comment_article")
+}
+
+model CommentLikeArticle {
+    id               Int      @id @default(autoincrement()) @map("id_comment_like")
+    uuid             String   @unique @default(uuid()) @map("uuid") @db.Uuid
+    articleId        Int      @map("id_article")
+    commentArticleId Int      @map("id_comment_article")
+    likeOrdislike    Boolean  @map("like_dislike")
+    personalNumber   String   @map("personal_number")
+    createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    commentLikeArticle CommentArticle @relation(fields: [commentArticleId], references: [id], onDelete: Cascade)
+
+    @@map("comment_like")
+}
+
+model Story {
+    id             Int      @id @default(autoincrement()) @map("id_story")
+    uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+    category       String   @map("category")
+    cover          String   @map("cover")
+    title          String   @map("title")
+    description    String   @map("description")
+    personalNumber String   @map("personal_number")
+    uploadBy       String   @map("upload_by")
+    unit           String   @map("unit")
+    score          Int      @map("score")
+    approvalStatus Boolean? @map("approval_status")
+    approvalDesc   String?  @map("approval_desc")
+    approvalBy     String?  @map("approval_by")
+    bannedStatus   Boolean  @map("banned_status")
+    editorChoice   Boolean  @map("editor_choice")
+    favorite       Boolean  @map("favorite")
+    video          String   @map("video")
+    path           String   @map("path")
+    view           Int      @map("view")
+    createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    watchStory StoryWatch[]
+
+    @@map("story")
+}
+
+model StoryWatch {
+    id             Int      @id @default(autoincrement()) @map("id_story_watch")
+    uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+    personalNumber String   @map("personal_number")
+    storyId        Int      @map("id_story")
+    createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    watchStory Story @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+    @@map("story_watch")
+}
+
+model BestPractice {
+    id             Int      @id @default(autoincrement()) @map("id_practice")
+    uuid           String   @unique @default(uuid()) @map("uuid") @db.Uuid
+    personalNumber String   @map("personal_number")
+    title          String   @map("title")
+    content        String   @map("content")
+    image          String   @map("image")
+    path           String   @map("path")
+    uploadBy       String   @map("upload_by")
+    unit           String   @map("unit")
+    score          Int      @map("score")
+    approvalStatus Boolean? @map("approval_status")
+    approvalDesc   String?  @map("approval_desc")
+    approvalBy     String?  @map("approval_by")
+    bannedStatus   Boolean  @map("banned_status")
+    editorChoice   Boolean  @map("editor_choice")
+    favorite       Boolean  @map("favorite")
+    createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    bestPracticeComment CommentBestPractice[]
+
+    @@map("best_practice")
+}
+
+model CommentBestPractice {
+    id                    Int                   @id @default(autoincrement()) @map("id_comment_practice")
+    uuid                  String                @unique @default(uuid()) @map("uuid") @db.Uuid
+    practiceId            Int                   @map("id_practice")
+    personalNumber        String                @map("personal_number")
+    personalName          String                @map("personal_name")
+    personalNumberMention String?               @map("personal_number_mention")
+    personalNameMention   String?               @map("personal_name_mention")
+    comment               String                @map("comment")
+    parentId              Int?                  @map("parent_id")
+    like                  Int                   @map("like")
+    dislike               Int                   @map("dislike")
+    createdAt             DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt             DateTime              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+    parentComment         CommentBestPractice?  @relation("replyCommentrelation", fields: [parentId], references: [id], onDelete: Cascade)
+    childComment          CommentBestPractice[] @relation("replyCommentrelation")
+
+    bestPracticeComment     BestPractice              @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+    commentLikeBestPractice CommentLikeBestPractice[]
+
+    @@map("comment_practice")
+}
+
+model CommentLikeBestPractice {
+    id                    Int      @id @default(autoincrement()) @map("id_comment_like")
+    uuid                  String   @unique @default(uuid()) @map("uuid") @db.Uuid
+    bestPracticeId        Int      @map("id_best_practice")
+    commentBestPracticeId Int      @map("id_comment_best_practice")
+    likeOrdislike         Boolean  @map("like_dislike")
+    personalNumber        String   @map("personal_number")
+    createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt             DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    commentLikeBestPractice CommentBestPractice @relation(fields: [commentBestPracticeId], references: [id], onDelete: Cascade)
+
+    @@map("comment_like_best_practice")
+}
+
+model LearningFuseSearch {
+    id        Int      @id @default(autoincrement()) @map("id_search")
+    search    String   @unique @map("search")
+    count     Int      @map("count")
+    createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    @@index([search])
+    @@map("learning_fuse")
+}
